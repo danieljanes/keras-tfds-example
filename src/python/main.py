@@ -79,8 +79,8 @@ def build_model(num_classes: int) -> tf.keras.Model:
   x = layers.AveragePooling2D(strides=(2, 2))(x)
 
   x = layers.Flatten()(x)
-  x = layers.Dense(120, activation='relu')(x)
-  x = layers.Dense(84, activation='relu')(x)
+  x = layers.Dense(120, activation='tanh')(x)
+  x = layers.Dense(84, activation='tanh')(x)
   outputs = layers.Dense(num_classes, activation='softmax')(x)
   
   return tf.keras.Model(inputs=inputs, outputs=outputs)
