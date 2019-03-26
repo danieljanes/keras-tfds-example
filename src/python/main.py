@@ -30,12 +30,17 @@ def main() -> None:
   ds_train = ds_train.map(preprocessing)
   ds_test = ds_test.map(preprocessing)
 
-  ds_train = ds_train.repeat().shuffle(buffer_size=10000).batch(BATCH_SIZE)
+  # Training
+  optimizer = tf.train.AdamOptimizer()
+  train(ds_train, ds_test, m_train, m_test, num_classes, BATCH_SIZE, STEPS_PER_EPOCH, optimizer)
+
+
+def train(ds_train, ds_test, m_train, m_test, num_classes, batch_size, steps_per_epoch, optimizer):
+  ds_train = ds_train.repeat().shuffle(buffer_size=10000).batch(batch_size)
   ds_test = ds_test.batch(m_test)
 
   # Build model
   model = build_model(num_classes)
-  optimizer = tf.train.AdamOptimizer()
   model.compile(optimizer=optimizer,
                 loss='categorical_crossentropy',
                 metrics=['accuracy'])
@@ -44,7 +49,7 @@ def main() -> None:
   # Training
   tb_callback = callbacks.TensorBoard(LOG_DIR)
   history = model.fit(ds_train, epochs=EPOCHS,
-                      steps_per_epoch=STEPS_PER_EPOCH,
+                      steps_per_epoch=steps_per_epoch,
                       callbacks=[tb_callback])
   print(history)
 
@@ -55,16 +60,11 @@ def main() -> None:
 
 
 def preprocessing(x, y):
-  x = tf.image.pad_to_bounding_box(x, 2,2,32, 32)
+  x = tf.image.pad_to_bounding_box(x, 2, 2, 32, 32)
   x = tf.cast(x, tf.float32)
   x = x / 255
   y = tf.one_hot(y, 10)
   return x, y
-
-
-def resize_image(image, label):
-  image_resized = tf.image.pad_to_bounding_box(image, 2,2,32, 32)
-  return image_resized, label
 
 
 def build_model(num_classes: int) -> tf.keras.Model:
