@@ -4,3 +4,6 @@
 .pants.d
 .pids
 .pants.workdir.file_lock
+
+# mypy
+.mypy_cache
