@@ -1,3 +1,2 @@
-tensorflow==1.13.1 ; sys_platform=="darwin"
-tensorflow-gpu==1.13.1 ; sys_platform=="linux"
+tensorflow==1.13.1
 tensorflow-datasets==1.0.1
