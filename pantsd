@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+PROJECT_NAME=${PWD##*/} 
+
+./build-support/init.sh
+
+docker run \
+    --name $PROJECT_NAME \
+    --rm \
+    -it \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $PROJECT_NAME-pants-cache:/root/.cache \
+    -v $PROJECT_NAME-pants-pants.d:/root/project/.pants.d \
+    -v $(PWD):/root/project \
+    dev-env $@
