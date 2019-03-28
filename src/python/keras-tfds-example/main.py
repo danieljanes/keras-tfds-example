@@ -13,16 +13,10 @@ BATCH_SIZE: int = 32
 
 
 def main() -> None:
-  # Dataset
-  (ds_train, ds_test), info = tfds.load(name="mnist",
-                                        split=["train", "test"],
-                                        as_supervised=True,
-                                        with_info=True)
-
-  # Number of classes, number of training/test examples
-  num_classes: int = info.features['label'].num_classes
-  m_train: int = info.splits['train'].num_examples
-  m_test: int = info.splits['test'].num_examples
+  # Dataset: Use either ds_real() or ds_random()
+  # - ds_mnist: provides a tf.data.Dataset after downloading MNIST
+  # - ds_rndm:  provides a tf.data.Dataset of the same shape, w/o any download
+  ds_train, ds_test, num_classes, m_train, m_test = ds_rndm()
 
   STEPS_PER_EPOCH: int = int(m_train / BATCH_SIZE)
 
@@ -57,6 +51,38 @@ def train(ds_train, ds_test, m_train, m_test, num_classes, batch_size, steps_per
   score = model.evaluate(ds_test, steps=1)
   print("Test set loss:    ", score[0])
   print("Test set accuracy:", score[1])
+
+
+def ds_mnist() -> Tuple[Dataset, Dataset, int, int, int]:
+  # Download and extract dataset using TFDS
+  (ds_train, ds_test), info = tfds.load(name="mnist",
+                                        split=["train", "test"],
+                                        as_supervised=True,
+                                        with_info=True)
+  # Number of classes, number of training/test examples
+  num_classes: int = info.features['label'].num_classes
+  m_train: int = info.splits['train'].num_examples
+  m_test: int = info.splits['test'].num_examples
+
+  return ds_train, ds_test, num_classes, m_train, m_test
+
+
+def ds_rndm() -> Tuple[Dataset, Dataset, int, int, int]:
+  # Hardcoded values taken from MNIST
+  num_classes = 10
+  m_train = 60000
+  m_test = 10000
+  # Random noise
+  ds_image = Dataset.from_tensor_slices((
+              tf.random_uniform([m_train, 28, 28, 1], maxval=255, dtype=tf.int32)
+             ))
+  ds_label = Dataset.from_tensor_slices((
+              tf.random_uniform([m_train], maxval=9, dtype=tf.int64)
+             ))
+  ds_train = Dataset.zip((ds_image, ds_label))
+  ds_test = ds_train.take(m_test)
+
+  return ds_train, ds_test, num_classes, m_train, m_test
 
 
 def preprocessing(x, y):
