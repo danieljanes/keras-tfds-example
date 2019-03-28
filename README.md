@@ -7,3 +7,12 @@ This project uses [Pantsbuild](https://www.pantsbuild.org/). To setup, build, an
 ```bash
 ./pants run src/python:keras-tfds-example
 ```
+
+## Docker build
+```bash
+# To create a docker image run
+./pantsd bundle src/python/keras-tfds-example:docker
+
+# to start the resulting image run
+docker run --rm project/keras-tfds-example
+```
